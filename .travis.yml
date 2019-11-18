@@ -3,13 +3,18 @@
 # THIS SCRIPT IS SUPPOSED TO BE AN EXAMPLE. MODIFY IT ACCORDING TO YOUR NEEDS!
 
 language: python
+dist: bionic
 virtualenv:
   system_site_packages: false
 matrix:
   fast_finish: true
   include:
     - python: 3.6
-      env: DISTRIB="ubuntu" TOX_PYTHON_VERSION="py36" COVERAGE="true"
+      env: DISTRIB="ubuntu" COVERAGE="true"
+    - python: 3.7
+      env: DISTRIB="ubuntu" COVERAGE="false"
+    - python: 3.8
+      env: DISTRIB="ubuntu" COVERAGE="false"
     - env: DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="false"
 before_install:
   - sudo apt install -y libopenvdb-dev build-essential
