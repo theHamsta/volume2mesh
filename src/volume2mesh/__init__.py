@@ -37,7 +37,7 @@ def readVdb(file, grid_name='', dense_shape=[0]*3, array=None):
     return rtn
 
 
-def writeVdb(file, array, grid_name, spacing, quantization_tolerance=0.):
+def write_vdb(file, array, grid_name, spacing, quantization_tolerance=0.):
     global _vdb_io
     if not _vdb_io:
         _vdb_io = cppimport.imp('volume2mesh.internal.vdb_io')
