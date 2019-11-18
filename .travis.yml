@@ -22,17 +22,18 @@ before_install:
   - cd OpenMesh
   - mkdir release
   - cd release && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . -- -j4
+  - cd ${TRAVIS_BUILD_DIR}
+  - source tests/travis_install.sh
   - sudo make install
   - git clone https://github.com/pybind/pybind11.git
   - cd pybind11
   - mkdir release
-  - cd release && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . -- -j4
+  - cd release && cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=`which python` .. && cmake --build . -- -j4
   - sudo make install
   - cd ${TRAVIS_BUILD_DIR}
 
 install:
   - cd ${TRAVIS_BUILD_DIR}
-  - source tests/travis_install.sh
   - export LD_LOAD_PATH=/usr/local/lib/:$LD_LOAD_PATH
   - export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
 before_script:
