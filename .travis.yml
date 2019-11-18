@@ -22,9 +22,9 @@ before_install:
   - cd OpenMesh
   - mkdir release
   - cd release && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . -- -j4
+  - sudo make install
   - cd ${TRAVIS_BUILD_DIR}
   - source tests/travis_install.sh
-  - sudo make install
   - git clone https://github.com/pybind/pybind11.git
   - cd pybind11
   - mkdir release
