@@ -16,7 +16,7 @@ _vdb_io = None
 _vdb_meshing = None
 
 
-def readVdb(file, grid_name='', dense_shape=[0]*3, array=None):
+def read_vdb(file, grid_name='', dense_shape=[0]*3, array=None):
     global _vdb_io
     if not _vdb_io:
         _vdb_io = cppimport.imp('volume2mesh.internal.vdb_io')
