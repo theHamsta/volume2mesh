@@ -25,6 +25,7 @@ before_install:
   - sudo make install
   - cd ${TRAVIS_BUILD_DIR}
   - source tests/travis_install.sh
+  - python -m pip install pytest
   - git clone https://github.com/pybind/pybind11.git
   - cd pybind11
   - mkdir release
