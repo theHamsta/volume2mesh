@@ -264,15 +264,6 @@ py::array_t< T > meshToSignedDistanceField(const std::string& filename, const do
         triangles.push_back({ trianglePoints[0], trianglePoints[1], trianglePoints[2] });
     }
 
-    // template<typename GridType>
-    // inline typename GridType::Ptr
-    // meshToSignedDistanceField(
-    // const openvdb::math::Transform& xform,
-    // const std::vector<Vec3s>& points,
-    // const std::vector<Vec3I>& triangles,
-    // const std::vector<Vec4I>& quads,
-    // float exBandWidth,
-    // float inBandWidth);
     typename Grid_T::Ptr grid = openvdb::tools::meshToSignedDistanceField< Grid_T >(
         *linearTransform, points, triangles, quads, exteriorBandWidth, interiorBandWidth);
     auto accessor = grid->getAccessor();
@@ -308,5 +299,4 @@ PYBIND11_MODULE(vdb_meshing, m)
           "onlyWriteBiggestComponents"_a = false, "maxComponentCount"_a = 1);
     m.def("meshToVolume", &meshToVolume< float >);
     m.def("meshToSignedDistanceField", &meshToVolume< float >);
-    // m.def( "meshToLevelSet", &meshToLevelSet<float> );
 }
