@@ -25,6 +25,7 @@ before_install:
   - mkdir release
   - cd release && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . -- -j4
   - sudo make install
+  - cd
 
 install:
   - source tests/travis_install.sh
