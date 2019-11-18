@@ -25,9 +25,10 @@ before_install:
   - mkdir release
   - cd release && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . -- -j4
   - sudo make install
-  - cd ${TRAVIS_HOME}/build
+  - cd ${TRAVIS_BUILD_DIR}
 
 install:
+  - cd ${TRAVIS_BUILD_DIR}
   - source tests/travis_install.sh
 before_script:
   - git config --global user.email "you@example.com"
