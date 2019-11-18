@@ -27,6 +27,7 @@ before_script:
 script:
   - python setup.py develop
   - tox
+  - pytest
 after_success:
   - if [[ "$COVERAGE" == "true" ]]; then coveralls || echo "failed"; fi
 after_script:
