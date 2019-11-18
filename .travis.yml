@@ -2,7 +2,6 @@
 # Read more under http://docs.travis-ci.com/user/build-configuration/
 # THIS SCRIPT IS SUPPOSED TO BE AN EXAMPLE. MODIFY IT ACCORDING TO YOUR NEEDS!
 
-sudo: true
 language: python
 virtualenv:
   system_site_packages: false
@@ -13,7 +12,7 @@ matrix:
       env: DISTRIB="ubuntu" TOX_PYTHON_VERSION="py36" COVERAGE="true"
     - env: DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="false"
 before_install:
-  - apt install -y libopenvdb-dev build-essential
+  - sudo apt install -y libopenvdb-dev build-essential
 
 install:
   - source tests/travis_install.sh
