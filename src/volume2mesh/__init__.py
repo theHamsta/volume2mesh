@@ -14,6 +14,7 @@ finally:
 
 _vdb_io = None
 _vdb_meshing = None
+_colored_mesh = None
 
 
 def read_vdb(file, grid_name='', dense_shape=[0]*3, array=None):
@@ -37,11 +38,13 @@ def read_vdb(file, grid_name='', dense_shape=[0]*3, array=None):
     return rtn
 
 
-def write_vdb(file, array, grid_name, spacing, quantization_tolerance=0.):
+def write_vdb(file, array, grid_name, spacing=None, quantization_tolerance=0.):
     global _vdb_io
     if not _vdb_io:
         _vdb_io = cppimport.imp('volume2mesh.internal.vdb_io')
     array = np.ascontiguousarray(array, np.float32)
+    if not spacing:
+        spacing = [1., 1., 1.]
     _vdb_io.writeFloatVdbGrid(file, array, grid_name, spacing, quantization_tolerance)
 
 
@@ -72,3 +75,10 @@ def mesh_to_signed_distance_field(mesh_file, scaling, exterior_band=1, interior_
     if not _vdb_meshing:
         _vdb_meshing = cppimport.imp('volume2mesh.internal.vdb_meshing')
     return _vdb_meshing.meshToSignedDistanceField(mesh_file, scaling, exterior_band, interior_band)
+
+
+def colored_mesh_to_array(mesh_file, scaling, exterior_band=1, interior_band=1000):
+    global _colored_mesh
+    if not _colored_mesh:
+        _colored_mesh = cppimport.imp('volume2mesh.internal.colored_mesh')
+    return _colored_mesh(mesh_file, scaling, exterior_band, interior_band)
