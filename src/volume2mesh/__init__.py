@@ -38,14 +38,12 @@ def read_vdb(file, grid_name='', dense_shape=[0]*3, array=None):
     return rtn
 
 
-def write_vdb(file, array, grid_name, spacing=None, quantization_tolerance=0.):
+def write_vdb(file, array, grid_name, spacing=[1., 1., 1.], origin=[0., 0., 0.], quantization_tolerance=0.):
     global _vdb_io
     if not _vdb_io:
         _vdb_io = cppimport.imp('volume2mesh.internal.vdb_io')
     array = np.ascontiguousarray(array, np.float32)
-    if not spacing:
-        spacing = [1., 1., 1.]
-    _vdb_io.writeFloatVdbGrid(file, array, grid_name, spacing, quantization_tolerance)
+    _vdb_io.writeFloatVdbGrid(file, array, grid_name, spacing, origin,  quantization_tolerance)
 
 
 def write_mesh_from_volume(file,
@@ -53,6 +51,7 @@ def write_mesh_from_volume(file,
                            isovalue=0.,
                            adaptivity=0.,
                            spacing=[1., 1., 1.],
+                           origin=[1., 1., 1.],
                            binary_file=True,
                            only_write_biggest_components=False,
                            max_component_count=1):
@@ -60,7 +59,15 @@ def write_mesh_from_volume(file,
     if not _vdb_meshing:
         _vdb_meshing = cppimport.imp('volume2mesh.internal.vdb_meshing')
     _vdb_meshing.writeMeshFromVolume(
-        file, volume, isovalue, adaptivity, spacing, binary_file, only_write_biggest_components, max_component_count)
+        file,
+        volume,
+        isovalue,
+        adaptivity,
+        spacing,
+        origin,
+        binary_file,
+        only_write_biggest_components,
+        max_component_count)
 
 
 def mesh_to_volume(mesh_file, scaling, exterior_band=1, interior_band=1000):

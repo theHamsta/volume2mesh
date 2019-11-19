@@ -246,7 +246,7 @@ py::array_t< T > readVdbGridIntoMemory(const std::string& filename, const std::s
 template< typename T >
 void writeVdbGrids(const std::string& filename, std::vector< py::array_t< T > > arrays,
                    const std::vector< std::string >& names, const std::array< double, 3 >& spacing,
-                   const float clippingTolerance = 0.f)
+                   const std::array< double, 3 >& origin, const float clippingTolerance = 0.f)
 {
     openvdb::initialize();
 
@@ -282,6 +282,7 @@ void writeVdbGrids(const std::string& filename, std::vector< py::array_t< T > > 
         grid->setName(names[arrayIdx]);
         auto scaleTransform = std::make_shared< openvdb::math::Transform >();
         scaleTransform->preScale({ spacing[0], spacing[1], spacing[2] });
+        scaleTransform->postTranslate({ origin[0], origin[1], origin[2] });
         grid->setTransform(scaleTransform);
 
         grids.push_back(grid);
@@ -294,11 +295,12 @@ void writeVdbGrids(const std::string& filename, std::vector< py::array_t< T > > 
 
 template< typename T >
 void writeVdbGrid(const std::string& filename, py::array_t< T > array, std::string& name,
-                  const std::array< double, 3 >& spacing, const float clippingTolerance = 0.f)
+                  const std::array< double, 3 >& spacing, const std::array< double, 3 >& origin,
+                  const float clippingTolerance = 0.f)
 {
     std::vector< py::array_t< T > > arrayVector{ array };
     std::vector< std::string > nameVector{ name };
-    writeVdbGrids(filename, arrayVector, nameVector, spacing, clippingTolerance);
+    writeVdbGrids(filename, arrayVector, nameVector, spacing, origin, clippingTolerance);
 }
 
 PYBIND11_MODULE(vdb_io, m)

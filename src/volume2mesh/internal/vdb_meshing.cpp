@@ -60,8 +60,8 @@ void deletedUnselectedFaces(Mesh_T& mesh)
 template< typename T >
 void writeMeshFromVolume(const std::string& filename, py::array_t< T > array, const float isovalue = 0.f,
                          const float adaptivity = 0.f, std::array< double, 3 > spacing = { 1., 1., 1. },
-                         bool writeBinaryMeshFile = true, bool onlyWriteBiggestComponents = false,
-                         int maxComponentCount = 1)
+                         std::array< double, 3 > origin = { 0., 0., 0. }, bool writeBinaryMeshFile = true,
+                         bool onlyWriteBiggestComponents = false, int maxComponentCount = 1)
 {
     openvdb::initialize();
 
@@ -70,6 +70,7 @@ void writeMeshFromVolume(const std::string& filename, py::array_t< T > array, co
     auto grid           = Grid_T::create();
     auto scaleTransform = std::make_shared< openvdb::math::Transform >();
     scaleTransform->preScale({ spacing[0], spacing[1], spacing[2] });
+    scaleTransform->postTranslate({ origin[0], origin[1], origin[2] });
     grid->setTransform(scaleTransform);
 
     auto accessor = grid->getAccessor();
@@ -295,7 +296,8 @@ py::array_t< T > meshToSignedDistanceField(const std::string& filename, const do
 PYBIND11_MODULE(vdb_meshing, m)
 {
     m.def("writeMeshFromVolume", &writeMeshFromVolume< float >, "filename"_a, "array"_a, "isovalue"_a = 0.f,
-          "adaptivity"_a = 0.f, "spacing"_a = 1., "writeBinaryMeshFile"_a = true,
+          "adaptivity"_a = 0.f, "spacing"_a = std::array< double, 3 >{ 1., 1., 1. },
+          "origin"_a = std::array< double, 3 >{ 0., 0., 0. }, "writeBinaryMeshFile"_a = true,
           "onlyWriteBiggestComponents"_a = false, "maxComponentCount"_a = 1);
     m.def("meshToVolume", &meshToVolume< float >);
     m.def("meshToSignedDistanceField", &meshToVolume< float >);
