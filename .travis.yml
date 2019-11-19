@@ -22,7 +22,7 @@ before_install:
   - git clone https://www.graphics.rwth-aachen.de:9000/OpenMesh/OpenMesh.git || echo "hi"
   - cd OpenMesh
   - git pull 
-  - mkdir release
+  - mkdir -p release
   - cd release && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . -- -j4
   - sudo make install
   - cd ${TRAVIS_BUILD_DIR}
@@ -30,7 +30,7 @@ before_install:
   - python -m pip install pytest
   - git clone https://github.com/pybind/pybind11.git
   - cd pybind11
-  - mkdir release
+  - mkdir -p release
   - cd release && cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=`which python` .. && cmake --build . -- -j4
   - sudo make install
   - cd ${TRAVIS_BUILD_DIR}
