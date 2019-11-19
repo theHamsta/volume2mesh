@@ -43,12 +43,12 @@ def read_vdb(file, grid_name='', dense_shape=[0]*3, array=None, return_spacing_o
         return rtn
 
 
-def write_vdb(file, array, grid_name, spacing=[1., 1., 1.], origin=[0., 0., 0.], quantization_tolerance=0.):
+def write_vdb(file, array, grid_name, spacing=[1., 1., 1.], origin=[0., 0., 0.], clipping_tolerance=0.):
     global _vdb_io
     if not _vdb_io:
         _vdb_io = cppimport.imp('volume2mesh.internal.vdb_io')
     array = np.ascontiguousarray(array, np.float32)
-    _vdb_io.writeFloatVdbGrid(file, array, grid_name, spacing, origin,  quantization_tolerance)
+    _vdb_io.writeFloatVdbGrid(file, array, grid_name, spacing, origin,  clipping_tolerance)
 
 
 def volume2mesh(file,
