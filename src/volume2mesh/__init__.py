@@ -17,25 +17,30 @@ _vdb_meshing = None
 _colored_mesh = None
 
 
-def read_vdb(file, grid_name='', dense_shape=[0]*3, array=None):
+def read_vdb(file, grid_name='', dense_shape=[0]*3, array=None, return_spacing_origin=False):
     global _vdb_io
     if not _vdb_io:
         _vdb_io = cppimport.imp('volume2mesh.internal.vdb_io')
 
-    # dense_shape = list(dense_shape)
     if grid_name == '':
         try:
-            rtn = _vdb_io.readFloatVdbGrid(file, dense_shape)
+            tuple_dict = _vdb_io.readFloatVdbGrid(file, dense_shape)
         except Exception:
-            rtn = _vdb_io.readIntVdbGrid(file, dense_shape)
-        # if len(rtn) == 1:
-        #     return next(iter(rtn.values()))
-    elif array is None:
-        rtn = _vdb_io.readFloatVdbGrid(file, grid_name, dense_shape)
-    else:
-        rtn = _vdb_io.readFloatVdbGrid(file, array, grid_name, dense_shape)
+            tuple_dict = _vdb_io.readIntVdbGrid(file, dense_shape)
 
-    return rtn
+        rtn = {k: v[0] for k, v in tuple_dict.items()}
+        spacing = {k: v[1] for k, v in tuple_dict.items()}
+        origin = {k: v[2] for k, v in tuple_dict.items()}
+
+    elif array is None:
+        rtn, spacing, origin = _vdb_io.readFloatVdbGrid(file, grid_name, dense_shape)
+    else:
+        rtn, spacing, origin = _vdb_io.readFloatVdbGrid(file, array, grid_name, dense_shape)
+
+    if return_spacing_origin:
+        return rtn, spacing, origin
+    else:
+        return rtn
 
 
 def write_vdb(file, array, grid_name, spacing=[1., 1., 1.], origin=[0., 0., 0.], quantization_tolerance=0.):
@@ -51,7 +56,7 @@ def volume2mesh(file,
                 isovalue=0.,
                 adaptivity=0.,
                 spacing=[1., 1., 1.],
-                origin=[1., 1., 1.],
+                origin=[0., 0., 0.],
                 binary_file=True,
                 only_write_biggest_components=False,
                 max_component_count=1):

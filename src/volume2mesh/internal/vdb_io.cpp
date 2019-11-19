@@ -7,6 +7,8 @@ cfg['compiler_args'] = ['-std=c++14']
 */
 #include <array>
 #include <map>
+#include <openvdb/Metadata.h>
+#include <openvdb/Types.h>
 #include <openvdb/openvdb.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
@@ -19,8 +21,8 @@ namespace py = pybind11;
 
 // TODO error handling
 template< typename T >
-py::array_t< T > readVdbGrid(const std::string& filename, const std::string& name,
-                             const std::array< int, 3 >& denseShape)
+auto readVdbGrid(const std::string& filename, const std::string& name, const std::array< int, 3 >& denseShape)
+    -> std::tuple< py::array_t< T >, std::array< double, 3 >, std::array< double, 3 > >
 {
     using Grid_T = openvdb::Grid< typename openvdb::tree::Tree4< T, 5, 4, 3 >::Type >;
 
@@ -52,11 +54,16 @@ py::array_t< T > readVdbGrid(const std::string& filename, const std::string& nam
         throw std::runtime_error("Could not open VDB Grid");
     }
 
+    std::array< double, 3 > spacing{ baseGrid->transform().voxelSize()[2], baseGrid->transform().voxelSize()[1],
+                                     baseGrid->transform().voxelSize()[0] };
     openvdb::CoordBBox boundingBox = grid->evalActiveVoxelBoundingBox();
+    auto originVec                 = baseGrid->transform().indexToWorld(
+        openvdb::Vec3i{ boundingBox.min().x(), boundingBox.min().y(), boundingBox.min().z() });
+    std::array< double, 3 > origin{ originVec[2], originVec[1], originVec[0] };
 
-    py::array_t< T > array({ std::max(denseShape[0], boundingBox.max().z() + 1),
-                             std::max(denseShape[1], boundingBox.max().y() + 1),
-                             std::max(denseShape[2], boundingBox.max().x() + 1) });
+    py::array_t< T > array({ std::max(denseShape[0], boundingBox.max().z() - boundingBox.min().z() + 1),
+                             std::max(denseShape[1], boundingBox.max().y() - boundingBox.min().y() + 1),
+                             std::max(denseShape[2], boundingBox.max().x() - boundingBox.min().x() + 1) });
 
     // TODO: make work also with uniform tiles
     // openvdb::tools::Dense<T, openvdb::tools::MemoryLayout::LayoutXYZ>
@@ -76,16 +83,17 @@ py::array_t< T > readVdbGrid(const std::string& filename, const std::string& nam
     // Set sparse voxels
     for (auto it = grid->beginValueOn(); it; ++it)
     {
-        auto coord                         = it.getCoord();
-        r(coord.z(), coord.y(), coord.x()) = it.getValue();
+        auto coord = it.getCoord();
+        r(coord.z() - boundingBox.min().z(), coord.y() - boundingBox.min().y(), coord.x() - boundingBox.min().z()) =
+            it.getValue();
     }
 
-    return array;
+    return { array, spacing, origin };
 }
 
 template< typename T, int numVectorComponents >
-py::array_t< T > readVdbVectorGrid(const std::string& filename, const std::string& name,
-                                   const std::array< int, 3 >& denseShape)
+auto readVdbVectorGrid(const std::string& filename, const std::string& name, const std::array< int, 3 >& denseShape)
+    -> std::tuple< py::array_t< T >, std::array< double, 3 >, std::array< double, 3 > >
 {
     using Grid_T = openvdb::Vec3SGrid;
 
@@ -117,11 +125,17 @@ py::array_t< T > readVdbVectorGrid(const std::string& filename, const std::strin
         throw std::runtime_error("Could not open VDB Grid");
     }
 
+    std::array< double, 3 > spacing{ baseGrid->transform().voxelSize()[2], baseGrid->transform().voxelSize()[1],
+                                     baseGrid->transform().voxelSize()[0] };
     openvdb::CoordBBox boundingBox = grid->evalActiveVoxelBoundingBox();
+    auto originVec                 = baseGrid->transform().indexToWorld(
+        openvdb::Vec3i{ boundingBox.min().x(), boundingBox.min().y(), boundingBox.min().z() });
+    std::array< double, 3 > origin{ originVec[2], originVec[1], originVec[0] };
 
-    py::array_t< T > array({ std::max(denseShape[0], boundingBox.max().z() + 1),
-                             std::max(denseShape[1], boundingBox.max().y() + 1),
-                             std::max(denseShape[2], boundingBox.max().x() + 1), numVectorComponents });
+    py::array_t< T > array({ std::max(denseShape[0], boundingBox.max().z() - boundingBox.min().z() + 1),
+                             std::max(denseShape[1], boundingBox.max().y() - boundingBox.min().y() + 1),
+                             std::max(denseShape[2], boundingBox.max().x() - boundingBox.min().x() + 1),
+                             numVectorComponents });
 
     // TODO: make work also with uniform tiles
     // openvdb::tools::Dense<T, openvdb::tools::MemoryLayout::LayoutXYZ>
@@ -145,18 +159,20 @@ py::array_t< T > readVdbVectorGrid(const std::string& filename, const std::strin
 
         for (int i = 0; i < numVectorComponents; ++i)
         {
-            r(coord.z(), coord.y(), coord.x(), i) = it.getValue()[i];
+            r(coord.z() - boundingBox.min().z(), coord.y() - boundingBox.min().y(), coord.x() - boundingBox.min().x(),
+              i) = it.getValue()[i];
         }
     }
 
-    return array;
+    return { array, spacing, origin };
 }
 
 template< typename T >
-std::map< std::string, py::array_t< T > > readVdbGrids(const std::string& filename,
-                                                       const std::array< int, 3 >& denseShape)
+auto readVdbGrids(const std::string& filename, const std::array< int, 3 >& denseShape)
+    -> std::map< std::string, std::tuple< py::array_t< T >, std::array< double, 3 >, std::array< double, 3 > > >
+
 {
-    std::map< std::string, py::array_t< T > > arrays;
+    std::map< std::string, std::tuple< py::array_t< T >, std::array< double, 3 >, std::array< double, 3 > > > arrays;
     std::vector< std::string > gridNames;
 
     openvdb::initialize();
@@ -281,9 +297,12 @@ void writeVdbGrids(const std::string& filename, std::vector< py::array_t< T > > 
         grid->pruneGrid(clippingTolerance);
         grid->setName(names[arrayIdx]);
         auto scaleTransform = std::make_shared< openvdb::math::Transform >();
-        scaleTransform->preScale({ spacing[0], spacing[1], spacing[2] });
-        scaleTransform->postTranslate({ origin[0], origin[1], origin[2] });
+        scaleTransform->preScale({ spacing[2], spacing[1], spacing[0] });
+        scaleTransform->postTranslate({ origin[2], origin[1], origin[0] });
         grid->setTransform(scaleTransform);
+
+        grid->insertMeta("origin", openvdb::Vec3DMetadata({ origin[0], origin[1], origin[2] }));
+        grid->insertMeta("spacing", openvdb::Vec3DMetadata({ spacing[0], spacing[1], spacing[2] }));
 
         grids.push_back(grid);
     }
