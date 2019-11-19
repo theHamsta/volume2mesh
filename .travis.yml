@@ -18,8 +18,9 @@ before_install:
   - sudo add-apt-repository universe
   - sudo apt-get update
   - sudo apt-get install -y libopenvdb-dev build-essential libboost-all-dev libtbb-dev
-  - git clone https://www.graphics.rwth-aachen.de:9000/OpenMesh/OpenMesh.git
+  - git clone https://www.graphics.rwth-aachen.de:9000/OpenMesh/OpenMesh.git || echo "hi"
   - cd OpenMesh
+  - git pull 
   - mkdir release
   - cd release && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . -- -j4
   - sudo make install
