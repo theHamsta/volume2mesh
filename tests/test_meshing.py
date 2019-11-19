@@ -19,11 +19,11 @@ num_samples = 100000
 
 def test_mesh2volume():
     bunny_file = join(dirname(__file__), 'data', 'bunny.obj')
-    volume = volume2mesh.mesh_to_volume(bunny_file, scaling=1.)
+    volume = volume2mesh.mesh2volume(bunny_file, scaling=1.)
     assert volume.any()
 
 
-def test_volume2mesh():
+def test_vdb_io():
     random_sparse_grid = np.zeros((100, 120, 131), np.float32)
 
     for _ in range(num_samples):
@@ -71,11 +71,11 @@ def test_save_mesh_from_volume():
     volume[20:40, 30:40, 40:50] = 1
     volume -= 0.5
 
-    volume2mesh.write_mesh_from_volume('/tmp/foo.obj', volume)
+    volume2mesh.volume2mesh('/tmp/foo.obj', volume)
 
 
 def read_volume_from_mesh_test():
-    array = volume2mesh.mesh_to_volume(join(dirname(__file__), "data", "cube.stl"), 100)
+    array = volume2mesh.mesh2volume(join(dirname(__file__), "data", "cube.stl"), 100)
     assert array is not None
 
 

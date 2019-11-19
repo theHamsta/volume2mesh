@@ -46,15 +46,15 @@ def write_vdb(file, array, grid_name, spacing=[1., 1., 1.], origin=[0., 0., 0.],
     _vdb_io.writeFloatVdbGrid(file, array, grid_name, spacing, origin,  quantization_tolerance)
 
 
-def write_mesh_from_volume(file,
-                           volume,
-                           isovalue=0.,
-                           adaptivity=0.,
-                           spacing=[1., 1., 1.],
-                           origin=[1., 1., 1.],
-                           binary_file=True,
-                           only_write_biggest_components=False,
-                           max_component_count=1):
+def volume2mesh(file,
+                volume,
+                isovalue=0.,
+                adaptivity=0.,
+                spacing=[1., 1., 1.],
+                origin=[1., 1., 1.],
+                binary_file=True,
+                only_write_biggest_components=False,
+                max_component_count=1):
     global _vdb_meshing
     if not _vdb_meshing:
         _vdb_meshing = cppimport.imp('volume2mesh.internal.vdb_meshing')
@@ -70,7 +70,7 @@ def write_mesh_from_volume(file,
         max_component_count)
 
 
-def mesh_to_volume(mesh_file, scaling, exterior_band=1, interior_band=1000):
+def mesh2volume(mesh_file, scaling, exterior_band=1, interior_band=1000):
     global _vdb_meshing
     if not _vdb_meshing:
         _vdb_meshing = cppimport.imp('volume2mesh.internal.vdb_meshing')
@@ -84,7 +84,7 @@ def mesh_to_signed_distance_field(mesh_file, scaling, exterior_band=1, interior_
     return _vdb_meshing.meshToSignedDistanceField(mesh_file, scaling, exterior_band, interior_band)
 
 
-def colored_mesh_to_array(mesh_file, scaling, exterior_band=1, interior_band=1000):
+def colored_mesh_to_volumes(mesh_file, scaling, exterior_band=1, interior_band=1000):
     global _colored_mesh
     if not _colored_mesh:
         _colored_mesh = cppimport.imp('volume2mesh.internal.colored_mesh')
