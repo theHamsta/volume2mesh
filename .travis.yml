@@ -11,6 +11,7 @@ matrix:
   include:
     - python: 3.6
       env: DISTRIB="ubuntu" COVERAGE="false"
+    - env: DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="false"
     - env: DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="false"
     - env: DISTRIB="conda" PYTHON_VERSION="3.7" COVERAGE="false"
     - env: DISTRIB="conda" PYTHON_VERSION="3.8" COVERAGE="false"
