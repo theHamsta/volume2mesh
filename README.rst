@@ -11,26 +11,26 @@
 volume2mesh
 ===========
 
- Voxelize meshes to volumes. Save meshes from volumes. 
+Voxelize meshes to volumes. Save meshes from volumes. 
 
- This package provides to functions ``volume2mesh`` and ``mesh2volume`` to convert between NumPy volume arrays and
- meshes:
+This package provides to functions ``volume2mesh`` and ``mesh2volume`` to convert between NumPy volume arrays and
+meshes:
 
- .. code:: python
- 
-    file = '/tmp/my_mesh_file.obj'
-    volume = np.zeros((100, 120, 131), np.float32)
-    volume[20:40, 30:40, 40:50] = 1
-     
-    volume2mesh(file,
-               volume,
-               threshold=0.5,
-               adaptivity=0.,
-               spacing=[1., 1., 1.],
-               origin=[0., 0., 0.],
-               binary_file=True,
-               only_write_biggest_components=False,
-               max_component_count=1)
+.. code:: python
+
+   file = '/tmp/my_mesh_file.obj'
+   volume = np.zeros((100, 120, 131), np.float32)
+   volume[20:40, 30:40, 40:50] = 1
+    
+   volume2mesh(file,
+              volume,
+              threshold=0.5,
+              adaptivity=0.,
+              spacing=[1., 1., 1.],
+              origin=[0., 0., 0.],
+              binary_file=True,
+              only_write_biggest_components=False,
+              max_component_count=1)
 
 And to voxelize meshes:
 
