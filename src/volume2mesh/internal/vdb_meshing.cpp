@@ -295,7 +295,7 @@ py::array_t< T > meshToSignedDistanceField(const std::string& filename, const do
 
 PYBIND11_MODULE(vdb_meshing, m)
 {
-    m.def("writeMeshFromVolume", &writeMeshFromVolume< float >, "filename"_a, "array"_a, "isovalue"_a = 0.f,
+    m.def("writeMeshFromVolume", &writeMeshFromVolume< float >, "filename"_a, "array"_a, "threshold"_a = 0.f,
           "adaptivity"_a = 0.f, "spacing"_a = std::array< double, 3 >{ 1., 1., 1. },
           "origin"_a = std::array< double, 3 >{ 0., 0., 0. }, "writeBinaryMeshFile"_a = true,
           "onlyWriteBiggestComponents"_a = false, "maxComponentCount"_a = 1);
