@@ -93,7 +93,7 @@ void writeMeshFromVolume(const std::string& filename, py::array_t< T > array, co
     std::vector< openvdb::Vec3s > points;
     std::vector< openvdb::Vec3I > triangles;
     std::vector< openvdb::Vec4I > quads;
-    openvdb::tools::volumeToMesh< Grid_T >(*grid, points, triangles, quads, isovalue, adaptivity);
+    openvdb::tools::volumeToMesh< Grid_T >(*grid, points, triangles, quads, -isovalue, adaptivity);
 
     OpenMesh_T mesh;
 
