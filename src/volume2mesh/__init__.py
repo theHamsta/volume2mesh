@@ -53,7 +53,7 @@ def write_vdb(file, array, grid_name, spacing=[1., 1., 1.], origin=[0., 0., 0.],
 
 def volume2mesh(file,
                 volume,
-                threshold=0.,
+                threshold,
                 adaptivity=0.,
                 spacing=[1., 1., 1.],
                 origin=[0., 0., 0.],
