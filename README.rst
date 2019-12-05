@@ -45,25 +45,25 @@ Installation
 You need to have `OpenMesh <https://www.openmesh.org/>`_ linkable via ``-lOpenMeshCore`` and `OpenVDB <openvdb.org>`_ 
 installed.
 
-On on Ubuntu, you can do this these commands (see our `Travis Script <https://github.com/theHamsta/volume2mesh/blob/master/.travis.yml>`_) :
+On on Ubuntu, you can do this these commands (see our `Travis Script <https://github.com/theHamsta/volume2mesh/blob/master/.travis.yml>`_):
 
 .. code:: bash
 
-    # Install OpenVDB
-    sudo apt-get install -y libopenvdb-dev build-essential libboost-all-dev libtbb-dev
+   # Install OpenVDB
+   sudo apt-get install -y libopenvdb-dev build-essential libboost-all-dev libtbb-dev
 
-    # Install OpenMesh
-    git clone https://www.graphics.rwth-aachen.de:9000/OpenMesh/OpenMesh.git || echo "hi"
-    cd OpenMesh
-    git pull 
-    mkdir -p release
-    cd release && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . -- -j4
-    sudo make install
+   # Install OpenMesh
+   git clone https://www.graphics.rwth-aachen.de:9000/OpenMesh/OpenMesh.git || echo "hi"
+   cd OpenMesh
+   git pull 
+   mkdir -p release
+   cd release && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . -- -j4
+   sudo make install
 
-    # Install this package
-    pip3 install volume2mesh --user
-    # Or if you cloned this repo
-    pip3 install -e . --user
+   # Install this package
+   pip3 install volume2mesh --user
+   # Or if you cloned this repo
+   pip3 install -e . --user
 
 
 
