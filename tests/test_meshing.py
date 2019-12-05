@@ -71,7 +71,7 @@ def test_save_mesh_from_volume():
     volume[20:40, 30:40, 40:50] = 1
     volume -= 0.5
 
-    volume2mesh.volume2mesh('/tmp/foo.obj', volume)
+    volume2mesh.volume2mesh('/tmp/foo.obj', volume, threshold=0.5)
 
 
 def read_volume_from_mesh_test():
