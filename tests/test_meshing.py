@@ -23,6 +23,13 @@ def test_mesh2volume():
     assert volume.any()
 
 
+def test_roundtrip():
+    bunny_file = join(dirname(__file__), 'data', 'bunny.obj')
+    volume = volume2mesh.mesh2volume(bunny_file, scaling=1.)
+    assert volume.any()
+    volume2mesh.volume2mesh('/tmp/new_bunny.obj', volume, 0.1)
+
+
 def test_vdb_io():
     random_sparse_grid = np.zeros((100, 120, 131), np.float32)
 
