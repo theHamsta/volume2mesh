@@ -36,7 +36,7 @@ And to voxelize meshes:
 
 .. code:: python
  
-   bunny_file = join('~/my_bunnyfile.stl')
+   bunny_file = '~/my_bunnyfile.stl'
    volume = volume2mesh.mesh2volume(bunny_file, scaling=1.)
 
 Installation
