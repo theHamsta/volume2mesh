@@ -85,7 +85,7 @@ void writeMeshFromVolume(const std::string& filename, py::array_t< T > array, co
             for (i = 0; i < r.shape(2); i++)
                 if (r(k, j, i) != 0.f)
                 {
-                    accessor.setValue(ijk, r(k, j, i));
+                    accessor.setValue(ijk, -r(k, j, i)); // - is to fix normals (positive should be inside)
                 }
 
     grid->pruneGrid(0.f);
@@ -210,7 +210,7 @@ py::array_t< T > meshToVolume(const std::string& filename, const double scaling,
     grid->tree().voxelizeActiveTiles();
 
     // Fill with background value
-    std::fill(array.mutable_data(), array.mutable_data() + array.size(), static_cast< T >(grid->background()));
+    std::fill(array.mutable_data(), array.mutable_data() + array.size(), static_cast< T >(0.));
 
     auto r = array.template mutable_unchecked< 3 >(); // Will throw if ndim != 3 or flags.writeable is false
 
@@ -219,7 +219,7 @@ py::array_t< T > meshToVolume(const std::string& filename, const double scaling,
     {
         auto coord = it.getCoord();
         r(coord.z() - boundingBox.min().z(), coord.y() - boundingBox.min().y(), coord.x() - boundingBox.min().x()) =
-            it.getValue();
+            1-it.getValue(); // - is for fixing the sign, (+) should be inside
     }
 
     return array;
@@ -278,7 +278,7 @@ py::array_t< T > meshToSignedDistanceField(const std::string& filename, const do
     grid->tree().voxelizeActiveTiles();
 
     // Fill with background value
-    std::fill(array.mutable_data(), array.mutable_data() + array.size(), static_cast< T >(grid->background()));
+    std::fill(array.mutable_data(), array.mutable_data() + array.size(), static_cast< T >(1-grid->background()));
 
     auto r = array.template mutable_unchecked< 3 >(); // Will throw if ndim != 3 or flags.writeable is false
 
@@ -287,7 +287,7 @@ py::array_t< T > meshToSignedDistanceField(const std::string& filename, const do
     {
         auto coord = it.getCoord();
         r(coord.z() - boundingBox.min().z(), coord.y() - boundingBox.min().y(), coord.x() - boundingBox.min().x()) =
-            it.getValue();
+           -it.getValue(); // -x is for fixing the sign, positive should be inside
     }
 
     return array;
