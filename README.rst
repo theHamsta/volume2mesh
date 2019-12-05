@@ -7,7 +7,9 @@
    :target: https://travis-ci.org/theHamsta/volume2mesh
    :alt: Build Status
 
-# volume2mesh
+===========
+volume2mesh
+===========
 
  Voxelize meshes to volumes. Save meshes from volumes. 
 
@@ -37,7 +39,8 @@ And to voxelize meshes:
     bunny_file = join('~/my_bunnyfile.stl')
     volume = volume2mesh.mesh2volume(bunny_file, scaling=1.)
 
-## Requirements
+Installation
+------------
 
 You need to have `OpenMesh <https://www.openmesh.org/>`_ linkable via ``-lOpenMeshCore`` and `OpenVDB <openvdb.org>`_ 
 installed.
