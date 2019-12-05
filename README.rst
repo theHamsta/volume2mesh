@@ -45,7 +45,7 @@ Installation
 You need to have `OpenMesh <https://www.openmesh.org/>`_ linkable via ``-lOpenMeshCore`` and `OpenVDB <openvdb.org>`_ 
 installed.
 
-On on Ubuntu, you can do this these commands (see our `Travis Script <https://github.com/theHamsta/volume2mesh/blob/master/.travis.yml>`_):
+On on Ubuntu, you can do this by these commands (see our `Travis Script <https://github.com/theHamsta/volume2mesh/blob/master/.travis.yml>`_):
 
 .. code:: bash
 
