@@ -69,7 +69,6 @@ def test_save_mesh_from_volume():
 
     volume = np.zeros((100, 120, 131), np.float32)
     volume[20:40, 30:40, 40:50] = 1
-    volume -= 0.5
 
     volume2mesh.volume2mesh('/tmp/foo.obj', volume, threshold=0.5)
 
