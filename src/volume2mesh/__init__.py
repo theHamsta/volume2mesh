@@ -66,7 +66,7 @@ def volume2mesh(file,
     _vdb_meshing.writeMeshFromVolume(
         file,
         volume,
-        threshold,
+        -threshold,
         adaptivity,
         spacing,
         origin,
