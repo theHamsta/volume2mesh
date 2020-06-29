@@ -2,6 +2,7 @@
 
 #include <OpenMesh/Core/IO/MeshIO.hh>
 #include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
+#include <array>
 #include <memory>
 #include <openvdb/openvdb.h>
 #include <stdexcept>
@@ -13,8 +14,9 @@ class MeshDataAdapter
   public:
     using OpenTriMesh_T = OpenMesh::TriMesh_ArrayKernelT<>;
 
-    MeshDataAdapter(const std::shared_ptr< OpenTriMesh_T > mesh, const double scaling)
-        : m_mesh(mesh), m_scaling(scaling){};
+    MeshDataAdapter(const std::shared_ptr< OpenTriMesh_T > mesh, const std::array< double, 3 > origin,
+                    const std::array< double, 3 > spacing)
+        : m_mesh(mesh), m_origin(origin), m_spacing(spacing){};
 
     size_t polygonCount() const { return m_mesh->n_faces(); }
     size_t pointCount() const { return m_mesh->n_vertices(); }               // Total number of points
@@ -31,12 +33,13 @@ class MeshDataAdapter
         }
 
         const auto point = m_mesh->point(*face_vertex_iterator);
-        pos[0]           = m_scaling * point[0];
-        pos[1]           = m_scaling * point[1];
-        pos[2]           = m_scaling * point[2];
+        pos[0]           = (point[0] - m_origin[0]) / m_spacing[0];
+        pos[1]           = (point[1] - m_origin[1]) / m_spacing[1];
+        pos[2]           = (point[2] - m_origin[2]) / m_spacing[2];
     }
 
   private:
     std::shared_ptr< OpenTriMesh_T > m_mesh;
-    double m_scaling;
+    std::array< double, 3 > m_origin;
+    std::array< double, 3 > m_spacing;
 };

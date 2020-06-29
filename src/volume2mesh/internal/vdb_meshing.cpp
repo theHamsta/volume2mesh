@@ -69,8 +69,8 @@ void writeMeshFromVolume(const std::string& filename, py::array_t< T > array, co
 
     auto grid           = Grid_T::create();
     auto scaleTransform = std::make_shared< openvdb::math::Transform >();
-    scaleTransform->preScale({ spacing[2], spacing[1], spacing[0] });
-    scaleTransform->postTranslate({ origin[2], origin[1], origin[0] });
+    scaleTransform->preScale({ 1./spacing[2], 1./spacing[1],1./ spacing[0] });
+    scaleTransform->postTranslate({ -origin[2], -origin[1], -origin[0] });
     grid->setTransform(scaleTransform);
 
     auto accessor = grid->getAccessor();
@@ -181,7 +181,7 @@ void selectBiggestComponents(Mesh_T* _mesh, int maxComponentCount)
 }
 
 template< typename T >
-py::array_t< T > meshToVolume(const std::string& filename, const double scaling, const double exteriorBandWidth,
+py::array_t< T > meshToVolume(const std::string& filename, const std::array<double,3> spacing, const double exteriorBandWidth,
                               const double interiorBandWidth)
 {
     using Grid_T = openvdb::Grid< typename openvdb::tree::Tree4< T, 5, 4, 3 >::Type >;
@@ -195,7 +195,7 @@ py::array_t< T > meshToVolume(const std::string& filename, const double scaling,
     }
 
     openvdb::math::Transform::Ptr linearTransform = openvdb::math::Transform::createLinearTransform(1);
-    MeshDataAdapter adapter(mesh, scaling);
+    MeshDataAdapter adapter(mesh, {0.,0.,0.}, spacing);
 
     typename Grid_T::Ptr grid = openvdb::tools::meshToVolume< Grid_T, MeshDataAdapter >(
         adapter, *linearTransform, exteriorBandWidth, interiorBandWidth);
@@ -219,7 +219,56 @@ py::array_t< T > meshToVolume(const std::string& filename, const double scaling,
     {
         auto coord = it.getCoord();
         r(coord.z() - boundingBox.min().z(), coord.y() - boundingBox.min().y(), coord.x() - boundingBox.min().x()) =
-            1-it.getValue(); // - is for fixing the sign, (+) should be inside
+            1 - it.getValue(); // - is for fixing the sign, (+) should be inside
+    }
+
+    return array;
+}
+
+template< typename T >
+py::array_t< T > meshToVolumeKnownDimensions(const std::string& filename, const std::array< double, 3 > origin,
+                                             const std::array< double, 3 > spacing,
+                                             const std::array< int, 3 > volumeDimensions,
+                                             const double exteriorBandWidth, const double interiorBandWidth)
+{
+    using Grid_T = openvdb::Grid< typename openvdb::tree::Tree4< T, 5, 4, 3 >::Type >;
+    openvdb::initialize();
+
+    auto mesh = std::make_shared< OpenTriMesh_T >();
+
+    if (!OpenMesh::IO::read_mesh(*mesh, filename))
+    {
+        throw std::runtime_error("Could not read mesh " + filename);
+    }
+
+    openvdb::math::Transform::Ptr linearTransform = openvdb::math::Transform::createLinearTransform();
+    linearTransform->postScale({ spacing[0], spacing[1], spacing[2] });
+    linearTransform->postTranslate({ origin[0], origin[1], origin[2] });
+
+    MeshDataAdapter adapter(mesh, origin, spacing);
+
+    typename Grid_T::Ptr grid = openvdb::tools::meshToVolume< Grid_T, MeshDataAdapter >(
+        adapter, *linearTransform, exteriorBandWidth, interiorBandWidth);
+    auto accessor = grid->getAccessor();
+    openvdb::Coord ijk;
+    openvdb::Coord minCoordinate{ 0, 0, 0 };
+    openvdb::Coord maxCoordinate{ volumeDimensions[0], volumeDimensions[1], volumeDimensions[2] };
+
+    py::array_t< T > array({ volumeDimensions[2], volumeDimensions[1], volumeDimensions[0] });
+
+    // Voxelize uniform tiles (work around)
+    grid->tree().voxelizeActiveTiles();
+
+    // Fill with background value
+    std::fill(array.mutable_data(), array.mutable_data() + array.size(), static_cast< T >(0.));
+
+    auto r = array.template mutable_unchecked< 3 >(); // Will throw if ndim != 3 or flags.writeable is false
+
+    // Set sparse voxels
+    for (auto it = grid->beginValueOn(); it; ++it)
+    {
+        auto coord                         = it.getCoord();
+        r(coord.z(), coord.y(), coord.x()) = 1 - it.getValue(); // - is for fixing the sign, (+) should be inside
     }
 
     return array;
@@ -278,7 +327,7 @@ py::array_t< T > meshToSignedDistanceField(const std::string& filename, const do
     grid->tree().voxelizeActiveTiles();
 
     // Fill with background value
-    std::fill(array.mutable_data(), array.mutable_data() + array.size(), static_cast< T >(1-grid->background()));
+    std::fill(array.mutable_data(), array.mutable_data() + array.size(), static_cast< T >(1 - grid->background()));
 
     auto r = array.template mutable_unchecked< 3 >(); // Will throw if ndim != 3 or flags.writeable is false
 
@@ -287,7 +336,7 @@ py::array_t< T > meshToSignedDistanceField(const std::string& filename, const do
     {
         auto coord = it.getCoord();
         r(coord.z() - boundingBox.min().z(), coord.y() - boundingBox.min().y(), coord.x() - boundingBox.min().x()) =
-           -it.getValue(); // -x is for fixing the sign, positive should be inside
+            -it.getValue(); // -x is for fixing the sign, positive should be inside
     }
 
     return array;
@@ -300,5 +349,6 @@ PYBIND11_MODULE(vdb_meshing, m)
           "origin"_a = std::array< double, 3 >{ 0., 0., 0. }, "writeBinaryMeshFile"_a = true,
           "onlyWriteBiggestComponents"_a = false, "maxComponentCount"_a = 1);
     m.def("meshToVolume", &meshToVolume< float >);
+    m.def("meshToVolumeKnownDimensions", &meshToVolumeKnownDimensions< float >);
     m.def("meshToSignedDistanceField", &meshToVolume< float >);
 }

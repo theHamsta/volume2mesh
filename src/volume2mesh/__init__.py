@@ -75,11 +75,27 @@ def volume2mesh(file,
         max_component_count)
 
 
-def mesh2volume(mesh_file, scaling, exterior_band=1, interior_band=1000):
+def mesh2volume(mesh_file, scaling, exterior_band=1, interior_band=1000, spacing=None):
     global _vdb_meshing
     if not _vdb_meshing:
         _vdb_meshing = cppimport.imp('volume2mesh.internal.vdb_meshing')
-    return _vdb_meshing.meshToVolume(mesh_file, scaling, exterior_band, interior_band)
+
+    spacing = spacing or 1/scaling
+    if isinstance(spacing, (float, int)):
+        spacing = [spacing] * 3
+    return _vdb_meshing.meshToVolume(mesh_file, spacing, exterior_band, interior_band)
+
+
+def mesh2volume_known_dimensions(mesh_file, origin, spacing, shape, exterior_band=1, interior_band=1000):
+    global _vdb_meshing
+    if not _vdb_meshing:
+        _vdb_meshing = cppimport.imp('volume2mesh.internal.vdb_meshing')
+    return _vdb_meshing.meshToVolumeKnownDimensions(mesh_file,
+                                                    origin,
+                                                    spacing,
+                                                    shape[::-1],
+                                                    exterior_band,
+                                                    interior_band)
 
 
 def mesh_to_signed_distance_field(mesh_file, scaling, exterior_band=1, interior_band=1000):
