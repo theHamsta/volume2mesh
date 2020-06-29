@@ -27,8 +27,6 @@ def test_roundtrip():
     bunny_file = join(dirname(__file__), 'data', 'bunny.obj')
     volume = volume2mesh.mesh2volume(bunny_file, scaling=1.)
     assert volume.any()
-    import pyconrad.autoinit
-    pyconrad.imshow(volume)
     volume2mesh.volume2mesh('/tmp/new_bunny.obj', volume, 0.1)
 
 
