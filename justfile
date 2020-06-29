@@ -6,7 +6,7 @@ test:
 release version: test
 	git tag {{version}}
 	git checkout {{version}}
-	git push --tags
+	git push --tags -f
 	python3 setup.py sdist
 	twine upload dist/volume2mesh-{{version}}.tar.gz
 	git checkout master
