@@ -111,6 +111,26 @@ def calc_vertex_data_from_scalar_field(mesh_file, scalar_field, origin, spacing,
                                                       interior_band)
 
 
+def calc_face_data_from_scalar_field(mesh_file,
+                                     scalar_field,
+                                     origin,
+                                     spacing,
+                                     exterior_band=1,
+                                     interior_band=1000,
+                                     calc_area=False):
+    global _vdb_meshing
+    if not _vdb_meshing:
+        _vdb_meshing = cppimport.imp('volume2mesh.internal.vdb_meshing')
+    assert len(scalar_field.shape) == 3
+    return _vdb_meshing.calcFaceDataFromScalarField(mesh_file,
+                                                    scalar_field,
+                                                    origin,
+                                                    spacing,
+                                                    exterior_band,
+                                                    interior_band,
+                                                    calc_area)
+
+
 def mesh_to_signed_distance_field(mesh_file, scaling, exterior_band=1, interior_band=1000):
     global _vdb_meshing
     if not _vdb_meshing:

@@ -402,6 +402,76 @@ py::array_t< T > calcVertexDataFromScalarField(const std::string& filename, cons
     return array;
 }
 
+template< typename T >
+std::tuple< py::array_t< T >, py::array_t< T > >
+    calcFaceDataFromScalarField(const std::string& filename, const py::array_t< T > scalarField,
+                                const std::array< double, 3 > origin, const std::array< double, 3 > spacing,
+                                const double exteriorBandWidth, const double interiorBandWidth, bool calcArea)
+{
+    using Grid_T = openvdb::Grid< typename openvdb::tree::Tree4< T, 5, 4, 3 >::Type >;
+    openvdb::initialize();
+
+    auto mesh = std::make_shared< OpenTriMesh_T >();
+
+    if (!OpenMesh::IO::read_mesh(*mesh, filename))
+    {
+        throw std::runtime_error("Could not read mesh " + filename);
+    }
+
+    openvdb::math::Transform::Ptr linearTransform = openvdb::math::Transform::createLinearTransform();
+    linearTransform->postScale({ spacing[0], spacing[1], spacing[2] });
+    linearTransform->postTranslate({ origin[0], origin[1], origin[2] });
+
+    MeshDataAdapter adapter(mesh, origin, spacing);
+
+    typename Grid_T::Ptr grid = openvdb::tools::meshToVolume< Grid_T, MeshDataAdapter >(
+        adapter, *linearTransform, exteriorBandWidth, interiorBandWidth);
+    auto accessor = grid->getAccessor();
+    openvdb::Coord ijk;
+    openvdb::Coord minCoordinate{ 0, 0, 0 };
+    openvdb::Coord maxCoordinate{ static_cast< int32_t >(scalarField.shape(2)),
+                                  static_cast< int32_t >(scalarField.shape(1)),
+                                  static_cast< int32_t >(scalarField.shape(0)) };
+
+    // Voxelize uniform tiles (work around)
+    grid->tree().voxelizeActiveTiles();
+
+    auto scalarFieldAccessor =
+        scalarField.template unchecked< 3 >(); // Will throw if ndim != 3 or flags.writeable is false
+
+    // Set sparse voxels
+    for (auto it = grid->beginValueOn(); it; ++it)
+    {
+        auto coord = it.getCoord();
+        accessor.setValue(coord, scalarFieldAccessor(coord.z(), coord.y(), coord.x()));
+    }
+
+    py::array_t< T > array({ mesh->n_faces() });
+    py::array_t< T > area_array({ mesh->n_faces() });
+
+    auto f = mesh->faces_begin();
+    for (size_t i = 0; f != mesh->faces_end(); ++i, ++f)
+    {
+        auto fv_iter = mesh->fv_iter(f);
+        auto P       = mesh->point(*fv_iter++);
+        auto R       = mesh->point(*fv_iter++);
+        auto Q       = mesh->point(*fv_iter++);
+
+        if (calcArea)
+        {
+            T area                       = static_cast< T >(((Q - P) % (R - P)).norm() * T(0.5));
+            area_array.mutable_data()[i] = area;
+        }
+
+        const openvdb::Vec3R coordinate{ ((P[0] + R[0] + Q[0]) * T(1 / 3.) - origin[0]) / spacing[0],
+                                         ((P[1] + R[1] + Q[1]) * T(1 / 3.) - origin[1]) / spacing[1],
+                                         ((P[2] + R[2] + Q[2]) * T(1 / 3.) - origin[2]) / spacing[2] };
+        array.mutable_data()[i] = static_cast< T >(openvdb::tools::BoxSampler::sample(grid->tree(), coordinate));
+    }
+
+    return { array, area_array };
+}
+
 PYBIND11_MODULE(vdb_meshing, m)
 {
     m.def("writeMeshFromVolume", &writeMeshFromVolume< float >, "filename"_a, "array"_a, "threshold"_a = 0.f,
@@ -413,4 +483,6 @@ PYBIND11_MODULE(vdb_meshing, m)
     m.def("meshToSignedDistanceField", &meshToVolume< float >);
     m.def("calcVertexDataFromScalarField", &calcVertexDataFromScalarField< float >, "mesh_file"_a, "scalarField"_a,
           "origin"_a, "spacing"_a, "exteriorBandWidth"_a, "interiorBandWidth"_a);
+    m.def("calcFaceDataFromScalarField", &calcFaceDataFromScalarField< float >, "mesh_file"_a, "scalarField"_a,
+          "origin"_a, "spacing"_a, "exteriorBandWidth"_a, "interiorBandWidth"_a, "calcArea"_a);
 }
