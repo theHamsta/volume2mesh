@@ -21,6 +21,7 @@ cfg['compiler_args'] = ['-std=c++14']
 #include <array>
 #include <memory>
 #include <openvdb/openvdb.h>
+#include <openvdb/Grid.h>
 #include <openvdb/tools/MeshToVolume.h>
 #include <openvdb/tools/VolumeToMesh.h>
 #include <pybind11/numpy.h>
