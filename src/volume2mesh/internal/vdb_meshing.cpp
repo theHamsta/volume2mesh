@@ -452,7 +452,7 @@ std::tuple< py::array_t< T >, py::array_t< T > >
     auto f = mesh->faces_begin();
     for (size_t i = 0; f != mesh->faces_end(); ++i, ++f)
     {
-        auto fv_iter = mesh->fv_iter(f);
+        auto fv_iter = mesh->fv_iter(*f);
         auto P       = mesh->point(*fv_iter++);
         auto R       = mesh->point(*fv_iter++);
         auto Q       = mesh->point(*fv_iter++);
