@@ -71,8 +71,8 @@ void writeMeshFromVolume(const std::string& filename, py::array_t< T > array, co
 
     auto grid           = Grid_T::create();
     auto scaleTransform = std::make_shared< openvdb::math::Transform >();
-    scaleTransform->preScale({ 1. / spacing[2], 1. / spacing[1], 1. / spacing[0] });
-    scaleTransform->postTranslate({ -origin[2], -origin[1], -origin[0] });
+    scaleTransform->preScale({ 1. * spacing[2], 1. * spacing[1], 1. * spacing[0] });
+    scaleTransform->postTranslate({ +origin[2], +origin[1], +origin[0] });
     grid->setTransform(scaleTransform);
 
     auto accessor = grid->getAccessor();
