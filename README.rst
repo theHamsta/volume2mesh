@@ -7,9 +7,9 @@
    :target: https://travis-ci.org/theHamsta/volume2mesh
    :alt: Build Status
 
-===========
-volume2mesh
-===========
+================================
+volume2mesh (and mesh to volume)
+================================
 
 Voxelize meshes to volumes. Save meshes from volumes. 
 
